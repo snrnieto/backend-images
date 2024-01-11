@@ -1,23 +1,11 @@
 const express = require("express");
-const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 
 const app = express();
-const port = 3001;
+var port = process.env.PORT || 3001;
 
-// Create a storage engine for Multer to handle file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);
-  },
-});
 
-const upload = multer({ storage });
 
 const images = [
   "https://images.unsplash.com/photo-1617922001439-4a2e6562f328?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8d29tZW4lMjBmYXNoaW9ufGVufDB8fDB8fHww",
@@ -101,44 +89,6 @@ app.get("/outfits", (req, res) => {
   });
 
   res.json({ outfits: outfitsToReturn });
-});
-
-// Define an endpoint to receive an image file
-app.post("/upload", upload.single("file"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
-
-  console.log("Uploading picture:", req.file.filename);
-
-  try {
-    const width = getRandomMultipleOf100();
-    const height = getRandomMultipleOf100();
-    const attachment_id = Math.floor(Math.random() * 1000);
-
-    // Construct the URL with the random width and height
-    const source_url = `http://placekitten.com/${width}/${height}`;
-
-    const response = { data: { source_url, attachment_id } };
-    console.log({ response });
-
-    res.json(response);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to generate a random kitten image URL" });
-  }
-});
-
-app.post("/upload-product", (req, res) => {
-  const success = Math.random() < 0.5;
-  console.log({ req });
-
-  if (success) {
-    res.json({ success: true, message: "Random success response" });
-  } else {
-    res.status(500).json({ success: false, error: "Random error response" });
-  }
 });
 
 app.listen(port, () => {
